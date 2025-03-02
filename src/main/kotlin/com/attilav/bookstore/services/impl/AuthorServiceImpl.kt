@@ -3,6 +3,7 @@ package com.attilav.bookstore.services.impl
 import com.attilav.bookstore.domain.entities.AuthorEntity
 import com.attilav.bookstore.repositories.AuthorRepository
 import com.attilav.bookstore.services.AuthorService
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service // this makes sure that the dependencies are injected
@@ -13,5 +14,9 @@ class AuthorServiceImpl(private val authorRepository: AuthorRepository): AuthorS
 
     override fun list(): List<AuthorEntity> {
         return authorRepository.findAll()
+    }
+
+    override fun get(id: Long): AuthorEntity? {
+        return authorRepository.findByIdOrNull(id)
     }
 }

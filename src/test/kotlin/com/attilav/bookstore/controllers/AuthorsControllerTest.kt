@@ -88,7 +88,6 @@ class AuthorsControllerTest @Autowired constructor(
             status { isOk() }
             content { json("[]") }
         }
-
     }
 
     @Test
@@ -110,6 +109,42 @@ class AuthorsControllerTest @Autowired constructor(
             content { jsonPath("$[0].description", equalTo("some description")) }
             content { jsonPath("$[0].image", equalTo("author-image.jpeg")) }
         }
+    }
 
+    @Test
+    fun `Test that get returns HTTP 404 if there is no authors in the database with the given id`() {
+        every {
+            authorService.get(any())
+        } answers {
+            null
+        }
+
+        mockMvc.get("${AUTHORS_BASE_URL}/999") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Test that get returns HTTP 200 and and AuthorDto if there is an author in the database with the given id`() {
+        every {
+            authorService.get(any())
+        } answers {
+            testAuthorEntity(1)
+        }
+
+        mockMvc.get("${AUTHORS_BASE_URL}/999") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { jsonPath("$.id", equalTo(1)) }
+            content { jsonPath("$.name", equalTo("John Doe")) }
+            content { jsonPath("$.age", equalTo(30)) }
+            content { jsonPath("$.description", equalTo("some description")) }
+            content { jsonPath("$.image", equalTo("author-image.jpeg")) }
+        }
     }
 }
