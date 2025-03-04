@@ -1,10 +1,9 @@
 package com.attilav.bookstore.controllers
 
-import com.attilav.bookstore.domain.dto.AuthorDto
 import com.attilav.bookstore.domain.entities.AuthorEntity
 import com.attilav.bookstore.services.AuthorService
 import com.attilav.bookstore.testAuthorDto
-import com.attilav.bookstore.testAuthorEntity
+import com.attilav.bookstore.testAuthorEntityA
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
@@ -19,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 
 private const val AUTHORS_BASE_URL = "/v1/authors"
 
@@ -35,7 +35,7 @@ class AuthorsControllerTest @Autowired constructor(
     @BeforeEach
     fun setup() {
         every {
-            authorService.save(any())
+            authorService.create(any())
         } answers {
             firstArg()
         }
@@ -50,6 +50,21 @@ class AuthorsControllerTest @Autowired constructor(
                 testAuthorDto()
             )
         }.andExpect { status { isCreated() } }
+    }
+
+    @Test
+    fun `Test that create Author returns a HTTP 400 on an error`() {
+        every {
+            authorService.create(any())
+        } throws(IllegalArgumentException())
+
+        mockMvc.post(AUTHORS_BASE_URL) {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(
+                testAuthorDto()
+            )
+        }.andExpect { status { isBadRequest() } }
     }
 
     @Test
@@ -70,7 +85,7 @@ class AuthorsControllerTest @Autowired constructor(
             description = "some description"
         )
 
-        verify{ authorService.save(expected) }
+        verify{ authorService.create(expected) }
     }
 
     @Test
@@ -95,7 +110,7 @@ class AuthorsControllerTest @Autowired constructor(
         every {
             authorService.list()
         } answers {
-            listOf(testAuthorEntity(1))
+            listOf(testAuthorEntityA(1))
         }
 
         mockMvc.get(AUTHORS_BASE_URL) {
@@ -132,7 +147,7 @@ class AuthorsControllerTest @Autowired constructor(
         every {
             authorService.get(any())
         } answers {
-            testAuthorEntity(1)
+            testAuthorEntityA(1)
         }
 
         mockMvc.get("${AUTHORS_BASE_URL}/999") {
@@ -145,6 +160,47 @@ class AuthorsControllerTest @Autowired constructor(
             content { jsonPath("$.age", equalTo(30)) }
             content { jsonPath("$.description", equalTo("some description")) }
             content { jsonPath("$.image", equalTo("author-image.jpeg")) }
+        }
+    }
+
+    @Test
+    fun `Test that full update Author return HTTP 200 and updated author on successful call`() {
+        every {
+            authorService.fullUpdate(any(), any())
+        } answers {
+            secondArg()
+        }
+
+        mockMvc.put("${AUTHORS_BASE_URL}/999") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(
+                testAuthorDto(1)
+            )
+        }.andExpect {
+            status { isOk() }
+            content { jsonPath("$.id", equalTo(1)) }
+            content { jsonPath("$.name", equalTo("John Doe")) }
+            content { jsonPath("$.age", equalTo(30)) }
+            content { jsonPath("$.description", equalTo("some description")) }
+            content { jsonPath("$.image", equalTo("author-image.jpeg")) }
+        }
+    }
+
+    @Test
+    fun `Test that full update Author return HTTP 400 on IllegalStateException`() {
+        every {
+            authorService.fullUpdate(any(), any())
+        } throws(IllegalStateException())
+
+        mockMvc.put("${AUTHORS_BASE_URL}/999") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(
+                testAuthorDto(1)
+            )
+        }.andExpect {
+            status { isBadRequest() }
         }
     }
 }

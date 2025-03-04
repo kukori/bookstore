@@ -5,10 +5,12 @@ import com.attilav.bookstore.repositories.AuthorRepository
 import com.attilav.bookstore.services.AuthorService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service // this makes sure that the dependencies are injected
 class AuthorServiceImpl(private val authorRepository: AuthorRepository): AuthorService {
-    override fun save(authorEntity: AuthorEntity): AuthorEntity {
+    override fun create(authorEntity: AuthorEntity): AuthorEntity {
+        require(authorEntity.id == null)
         return authorRepository.save(authorEntity)
     }
 
@@ -18,5 +20,12 @@ class AuthorServiceImpl(private val authorRepository: AuthorRepository): AuthorS
 
     override fun get(id: Long): AuthorEntity? {
         return authorRepository.findByIdOrNull(id)
+    }
+
+    @Transactional
+    override fun fullUpdate(id: Long, authorEntity: AuthorEntity): AuthorEntity {
+        check(authorRepository.existsById(id))
+        val normalizedAuthor = authorEntity.copy(id=id)
+        return authorRepository.save(normalizedAuthor)
     }
 }
