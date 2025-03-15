@@ -1,5 +1,6 @@
 package com.attilav.bookstore.services
 
+import com.attilav.bookstore.domain.AuthorUpdateRequest
 import com.attilav.bookstore.domain.entities.AuthorEntity
 
 interface AuthorService {
@@ -10,4 +11,6 @@ interface AuthorService {
     fun get(id: Long): AuthorEntity?
 
     fun fullUpdate(id: Long, authorEntity: AuthorEntity): AuthorEntity
+
+    fun partialUpdate(id: Long, authorUpdate: AuthorUpdateRequest): AuthorEntity
 }

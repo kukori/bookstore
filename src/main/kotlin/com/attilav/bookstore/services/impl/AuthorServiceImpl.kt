@@ -1,8 +1,10 @@
 package com.attilav.bookstore.services.impl
 
+import com.attilav.bookstore.domain.AuthorUpdateRequest
 import com.attilav.bookstore.domain.entities.AuthorEntity
 import com.attilav.bookstore.repositories.AuthorRepository
 import com.attilav.bookstore.services.AuthorService
+import org.hibernate.sql.Update
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,5 +29,20 @@ class AuthorServiceImpl(private val authorRepository: AuthorRepository): AuthorS
         check(authorRepository.existsById(id))
         val normalizedAuthor = authorEntity.copy(id=id)
         return authorRepository.save(normalizedAuthor)
+    }
+
+    @Transactional
+    override fun partialUpdate(id: Long, authorUpdate: AuthorUpdateRequest): AuthorEntity {
+        val existingAuthor = authorRepository.findByIdOrNull(id)
+        checkNotNull(existingAuthor)
+
+        val updatedAuthor = existingAuthor.copy(
+            name = authorUpdate.name ?: existingAuthor.name,
+            age = authorUpdate.age ?: existingAuthor.age,
+            description = authorUpdate.description ?: existingAuthor.description,
+            image = authorUpdate.image ?: existingAuthor.image
+        )
+
+        return authorRepository.save(updatedAuthor)
     }
 }
