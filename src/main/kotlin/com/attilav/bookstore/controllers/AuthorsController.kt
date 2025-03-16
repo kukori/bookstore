@@ -60,4 +60,10 @@ class AuthorsController(private val authorService: AuthorService) {
             ResponseEntity(HttpStatus.BAD_REQUEST)
         }
     }
+
+    @DeleteMapping(path = ["/{id}"])
+    fun deleteAuthorById(@PathVariable id: Long): ResponseEntity<Unit> {
+        authorService.delete(id)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
 }

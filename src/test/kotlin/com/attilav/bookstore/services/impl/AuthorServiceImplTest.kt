@@ -178,4 +178,21 @@ class AuthorServiceImplTest@Autowired constructor(
             val result = underTest.partialUpdate(123L, testAuthorUpdateRequestA())
         }
     }
+
+    @Test
+    fun `Test that delete Author deletes an existing author in the database` () {
+        val existingAuthor = authorRepository.save(testAuthorEntityA())
+        underTest.delete(existingAuthor.id!!)
+        assertThat(
+            authorRepository.existsById(existingAuthor.id!!)
+        ).isFalse()
+    }
+
+    @Test
+    fun `Test that delete Author deletes non existing author in the database` () {
+        underTest.delete(999L)
+        assertThat(
+            authorRepository.existsById(999L)
+        ).isFalse()
+    }
 }
