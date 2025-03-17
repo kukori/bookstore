@@ -4,7 +4,6 @@ import com.attilav.bookstore.domain.AuthorUpdateRequest
 import com.attilav.bookstore.domain.entities.AuthorEntity
 import com.attilav.bookstore.repositories.AuthorRepository
 import com.attilav.bookstore.services.AuthorService
-import org.hibernate.sql.Update
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
