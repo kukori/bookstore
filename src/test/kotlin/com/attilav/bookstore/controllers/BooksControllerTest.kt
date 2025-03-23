@@ -7,6 +7,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.hamcrest.CoreMatchers.equalTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -105,5 +106,29 @@ class BooksControllerTest @Autowired constructor(
                 bookSummaryDto
             )
         }.andExpect { status { isBadRequest() } }
+    }
+
+    @Test
+    fun `Test that readManyBooks returns a list of all books`() {
+        val isbn = "978-089-230342-0777"
+
+        every {
+            bookService.list()
+        } answers {
+            listOf(testBookEntityA(isbn = isbn, testAuthorEntityA(id=1)))
+        }
+
+        mockMvc.get("/v1/books") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { jsonPath("$[0].isbn", equalTo(isbn)) }
+            content { jsonPath("$[0].title", equalTo("Test Book A")) }
+            content { jsonPath("$[0].image", equalTo("book-image.jpeg")) }
+            content { jsonPath("$[0].author.id", equalTo(1)) }
+            content { jsonPath("$[0].author.name", equalTo("John Doe")) }
+            content { jsonPath("$[0].author.image", equalTo( "author-image.jpeg")) }
+        }
     }
 }
